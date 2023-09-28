@@ -83,17 +83,13 @@ func TestGetBlockchainID(t *testing.T) {
 
 func TestSendWarpMessage(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
-	receiverAddr := common.HexToAddress("0x456789")
 
 	defaultSnowCtx := snow.DefaultContextTest()
 	blockchainID := defaultSnowCtx.ChainID
-	destinationChainID := ids.GenerateTestID()
 	sendWarpMessagePayload := utils.RandomBytes(100)
 
 	sendWarpMessageInput, err := PackSendWarpMessage(SendWarpMessageInput{
-		DestinationChainID: common.Hash(destinationChainID),
-		DestinationAddress: receiverAddr,
-		Payload:            sendWarpMessagePayload,
+		Payload: sendWarpMessagePayload,
 	})
 	require.NoError(t, err)
 
@@ -146,8 +142,6 @@ func TestSendWarpMessage(t *testing.T) {
 
 				require.Equal(t, addressedPayload.SourceAddress, callerAddr)
 				require.Equal(t, unsignedWarpMsg.SourceChainID, blockchainID)
-				require.Equal(t, addressedPayload.DestinationChainID, common.Hash(destinationChainID))
-				require.Equal(t, addressedPayload.DestinationAddress, receiverAddr)
 				require.Equal(t, addressedPayload.Payload, sendWarpMessagePayload)
 			},
 		},
@@ -160,13 +154,10 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 	networkID := uint32(54321)
 	callerAddr := common.HexToAddress("0x0123")
 	sourceAddress := common.HexToAddress("0x456789")
-	destinationAddress := common.HexToAddress("0x987654")
 	sourceChainID := ids.GenerateTestID()
 	packagedPayloadBytes := []byte("mcsorley")
 	addressedPayload, err := warpPayload.NewAddressedPayload(
 		sourceAddress,
-		common.Hash(destinationChainID),
-		destinationAddress,
 		packagedPayloadBytes,
 	)
 	require.NoError(t, err)
@@ -195,8 +186,6 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 					Message: WarpMessage{
 						SourceChainID:       common.Hash(sourceChainID),
 						OriginSenderAddress: sourceAddress,
-						DestinationChainID:  common.Hash(destinationChainID),
-						DestinationAddress:  destinationAddress,
 						Payload:             packagedPayloadBytes,
 					},
 					Valid: true,
@@ -254,8 +243,6 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 					Message: WarpMessage{
 						SourceChainID:       common.Hash(sourceChainID),
 						OriginSenderAddress: sourceAddress,
-						DestinationChainID:  common.Hash(destinationChainID),
-						DestinationAddress:  destinationAddress,
 						Payload:             packagedPayloadBytes,
 					},
 					Valid: true,
@@ -298,8 +285,6 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 					Message: WarpMessage{
 						SourceChainID:       common.Hash(sourceChainID),
 						OriginSenderAddress: sourceAddress,
-						DestinationChainID:  common.Hash(destinationChainID),
-						DestinationAddress:  destinationAddress,
 						Payload:             packagedPayloadBytes,
 					},
 					Valid: true,

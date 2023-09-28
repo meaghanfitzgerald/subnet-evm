@@ -68,8 +68,6 @@ type GetVerifiedWarpBlockHashOutput struct {
 type WarpMessage struct {
 	SourceChainID       common.Hash
 	OriginSenderAddress common.Address
-	DestinationChainID  common.Hash
-	DestinationAddress  common.Address
 	Payload             []byte
 }
 
@@ -78,9 +76,7 @@ type GetVerifiedWarpMessageOutput struct {
 	Valid   bool
 }
 type SendWarpMessageInput struct {
-	DestinationChainID common.Hash
-	DestinationAddress common.Address
-	Payload            []byte
+	Payload []byte
 }
 
 // PackGetBlockchainID packs the include selector (first 4 func signature bytes).
@@ -202,7 +198,7 @@ func UnpackSendWarpMessageInput(input []byte) (SendWarpMessageInput, error) {
 
 // PackSendWarpMessage packs [inputStruct] of type SendWarpMessageInput into the appropriate arguments for sendWarpMessage.
 func PackSendWarpMessage(inputStruct SendWarpMessageInput) ([]byte, error) {
-	return WarpABI.Pack("sendWarpMessage", inputStruct.DestinationChainID, inputStruct.DestinationAddress, inputStruct.Payload)
+	return WarpABI.Pack("sendWarpMessage", inputStruct.Payload)
 }
 
 // sendWarpMessage constructs an Avalanche Warp Message containing an AddressedPayload and emits a log to signal validators that they should
@@ -230,17 +226,13 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	}
 
 	var (
-		sourceChainID      = accessibleState.GetSnowContext().ChainID
-		destinationChainID = inputStruct.DestinationChainID
-		sourceAddress      = caller
-		destinationAddress = inputStruct.DestinationAddress
-		payload            = inputStruct.Payload
+		sourceChainID = accessibleState.GetSnowContext().ChainID
+		sourceAddress = caller
+		payload       = inputStruct.Payload
 	)
 
 	addressedPayload, err := warpPayload.NewAddressedPayload(
 		sourceAddress,
-		destinationChainID,
-		destinationAddress,
 		payload,
 	)
 	if err != nil {
@@ -260,8 +252,6 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		ContractAddress,
 		[]common.Hash{
 			WarpABI.Events["SendWarpMessage"].ID,
-			destinationChainID,
-			destinationAddress.Hash(),
 			sourceAddress.Hash(),
 		},
 		unsignedWarpMessage.Bytes(),
