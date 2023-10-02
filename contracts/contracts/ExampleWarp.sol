@@ -8,7 +8,7 @@ contract ExampleWarp {
     address constant WARP_ADDRESS = 0x0200000000000000000000000000000000000005;
     IWarpMessenger warp = IWarpMessenger(WARP_ADDRESS);
 
-    // sendWarpMessage sends a warp message to the specified destination chain and address pair containing the payload
+    // sendWarpMessage sends a warp message containing the payload
     function sendWarpMessage(bytes calldata payload) external {
         warp.sendWarpMessage(payload);
     }
